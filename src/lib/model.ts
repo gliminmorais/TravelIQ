@@ -35,5 +35,3 @@ export type Booking = {
   version: number;
   createdAt: string;
 };
-export type DocumentRecord = { id: string; bookingId: string; name: string; createdAt: string };
-export type Viewer = { name: string; role: 'admin' | 'staff' };

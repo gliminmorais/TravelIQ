@@ -21,6 +21,60 @@ const review = [
   'Verify every extracted field against the original ticket. Agency cost and customer charged must be entered manually.',
   'Airline names may be resolved from verified carrier codes. Flight times are local; time zones are not inferred.',
 ];
+export const indigoItineraryParser: TicketParser = {
+  id: 'indigo-itinerary-v1',
+  matches: (text) =>
+    /PNR\s*\/\s*Booking\s+Ref/i.test(text) &&
+    /Passenger\s+Information/i.test(text) &&
+    /\b6E\s*\d{1,4}\b/.test(text),
+  parse(text) {
+    const section =
+      text.split(/Passenger\s+Information/i)[1]?.split(/\bSector\b|\bDeparting\b/i)[0] || '';
+    const passengers = [
+      ...section.matchAll(
+        /\b(?:MRS|MR|MS|MISS|MSTR)\.?\s+([A-Z][A-Z\s.'/-]*?)\s+(?:Adult|Child|Infant)\b/gi,
+      ),
+    ].map((m) => ({ name: m[1].replace(/\s+/g, ' ').trim(), ticketNumber: '' }));
+    const travel = text.split(/\bDeparting\b/i)[1]?.split(/Baggage\s+Information/i)[0] || '';
+    const airports = [
+      ...travel.matchAll(/(?:^|\n)\s*([A-Z]{3})\s*[-–]\s*[^\n]*(?:Airport|Aerodrome)/g),
+    ].map((m) => m[1]);
+    const dates = [...travel.matchAll(/(\d{2}:\d{2}),?\s+(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/g)];
+    // Content-stream order can put the flight number after both airport/time columns.
+    const flights = [
+      ...text.split(/Baggage\s+Information/i)[0].matchAll(/\b6E\s*(\d{1,4})\s*[.·]/g),
+    ];
+    const warnings = [...review];
+    const aligned = airports.length === dates.length && airports.length === flights.length * 2;
+    if (!aligned)
+      warnings.push(
+        'Flight columns are incomplete or ambiguous. Check every airport and time against the ticket.',
+      );
+    const segments = flights.map((flight, i) => {
+      const departure = dates[i * 2],
+        arrival = dates[i * 2 + 1];
+      return {
+        airline: 'IndiGo',
+        flightNumber: '6E ' + flight[1],
+        origin: aligned ? airports[i * 2] : '',
+        destination: aligned ? airports[i * 2 + 1] : '',
+        departure: aligned ? namedDate(departure[2], departure[3], departure[4], departure[1]) : '',
+        arrival: aligned ? namedDate(arrival[2], arrival[3], arrival[4], arrival[1]) : '',
+      };
+    });
+    if (!passengers.length)
+      warnings.push('Passenger names could not be identified. Enter them manually.');
+    if (!segments.length)
+      warnings.push('Flight rows could not be identified. Enter them manually.');
+    return {
+      pnr:
+        text.match(/PNR\s*\/\s*Booking\s+Ref\s*:?\s*([A-Z0-9]{5,10})\b/i)?.[1]?.toUpperCase() || '',
+      passengers,
+      segments,
+      warnings,
+    };
+  },
+};
 function namedDate(day: string, month: string, year: string, time: string) {
   const m = months[month.slice(0, 3).toLowerCase()];
   if (!m) return '';

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { financials, duplicateBookings, validateTransaction, csv, D } from '@/lib/finance';
 import { bookingSchema, transactionSchema } from '@/lib/validation';
-import { applicationMode } from '@/lib/config';
 import { totals, monthly, simulate, anomalies, customers } from '@/lib/analytics';
 import { forecast, metrics, predict } from '@/lib/forecast';
 import { demoBookings } from '@/lib/demo';
@@ -96,20 +95,7 @@ describe('validation and separation', () => {
       }).success,
     ).toBe(true);
   });
-  it('refuses all private configuration in a demo', () => {
-    expect(applicationMode({})).toBe('demo');
-    for (const k of [
-      'DATABASE_URL',
-      'SUPABASE_URL',
-      'SUPABASE_ANON_KEY',
-      'SUPABASE_SERVICE_ROLE_KEY',
-      'MIGRATION_DATABASE_URL',
-      'STORAGE_BUCKET',
-    ])
-      expect(() => applicationMode({ APP_MODE: 'demo', [k]: 'secret' })).toThrow();
-    expect(applicationMode({ APP_MODE: 'agency' })).toBe('agency');
-    expect(() => applicationMode({ APP_MODE: 'invalid' })).toThrow();
-  });
+
   it('warns about duplicates without treating PNR as a unique key', () => {
     const b = example();
     expect(duplicateBookings([b], b).length).toBe(1);

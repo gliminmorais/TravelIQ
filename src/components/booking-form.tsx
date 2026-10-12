@@ -53,7 +53,6 @@ export function BookingForm({
     [warnings, setWarnings] = useState<string[]>([]),
     [file, setFile] = useState<File>(),
     [preview, setPreview] = useState(''),
-    [retain, setRetain] = useState(false),
     [verified, setVerified] = useState(!upload);
   useEffect(() => {
     if (!file) return;
@@ -107,7 +106,7 @@ export function BookingForm({
     }
     setBusy(true);
     try {
-      await onSave(result.data, existing?.id, retain ? file : undefined);
+      await onSave(result.data, existing?.id);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to save');
@@ -409,14 +408,9 @@ export function BookingForm({
                 />
                 I have verified the extracted details against the original ticket.
               </label>
-              <label className="checkbox">
-                <input
-                  type="checkbox"
-                  checked={retain}
-                  onChange={(e) => setRetain(e.target.checked)}
-                />
-                Retain PDF in private agency storage (demo files stay temporary).
-              </label>
+              <p className="footnote">
+                The PDF stays on your device and is not retained after review.
+              </p>
             </>
           )}
           {error && (

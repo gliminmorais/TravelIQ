@@ -39,4 +39,4 @@ Expected fulfilled bookings = expected monthly bookings × (1 + growth/100) × (
 4. Explain chronology: a model can only see the past at each origin, and model selection must not use the final holdout.
 5. Explain why the measured synthetic WAPE is sizeable and why reporting it honestly is better than inventing accuracy.
 6. Show a negative-profit alert, the reason, and the original booking for review.
-7. Describe the demo/private boundary, membership checks, composite foreign keys and RLS, then distinguish local verification from outstanding live-provider tests.
+7. Explain browser-local storage, visitor isolation, permanent deletion and reset persistence. Show that deleted and previously archived bookings are excluded before generating reports or forecasts.

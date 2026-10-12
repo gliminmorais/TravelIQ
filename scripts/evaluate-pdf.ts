@@ -43,7 +43,7 @@ async function main() {
     results.push({ file: fixture.file, parser: result.parser, fields });
   }
   const report = {
-    dataset: 'Five generated fictional fixtures; not representative airline accuracy',
+    dataset: 'Six generated fictional fixtures; not representative airline accuracy',
     documents: fixtures.length,
     fields: total,
     correct: matched,

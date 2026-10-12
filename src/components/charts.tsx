@@ -1,4 +1,5 @@
 'use client';
+import { Empty } from './ui';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -26,6 +27,7 @@ export function TrendChart({
   data: { label: string; revenue: number; profit: number }[];
   cash?: boolean;
 }) {
+  if (!data.length) return <Empty text="Add a booking to see your revenue and profit trend." />;
   return (
     <div className="chart">
       <ResponsiveContainer width="100%" height="100%">

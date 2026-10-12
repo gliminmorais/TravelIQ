@@ -43,6 +43,14 @@ fixtures.extend([
  {'pnr':'DEMO05','passengers':[{'name':'Rohan Example','ticketNumber':'00000005'}],'segments':[{'airline':'Air India Express','flightNumber':'IX 100','origin':'COK','destination':'DXB','departure':'2027-01-21T08:20','arrival':'2027-01-21T11:05'}]})
 ])
 expected=[]
+fixtures.append(('indigo-itinerary-ticket.pdf','INDIGO | FICTIONAL ITINERARY',[
+ 'Passenger Information','MRS MAYA EXAMPLE Adult','MSTR ARJUN EXAMPLE Child','MISS TARA EXAMPLE Child',
+ 'Sector Seat Services Purchased','BOM - DXB - -','Departing','Check-in/Bag drop closes: 00:05 hrs',
+ 'BOM - Mumbai International Airport','(Terminal 2)','01:20, 15 Nov 2026',
+ 'DXB - Dubai International Airport','03:55, 15 Nov 2026',
+ 'PNR / Booking Ref DEMO06 Confirmed Payment status Complete','6E 1234 . A320','Baggage Information'],
+ {'pnr':'DEMO06','passengers':[{'name':'MAYA EXAMPLE','ticketNumber':''},{'name':'ARJUN EXAMPLE','ticketNumber':''},{'name':'TARA EXAMPLE','ticketNumber':''}],
+ 'segments':[{'airline':'IndiGo','flightNumber':'6E 1234','origin':'BOM','destination':'DXB','departure':'2026-11-15T01:20','arrival':'2026-11-15T03:55'}]}))
 for filename,title,lines,fields in fixtures:
  contact={'single-ticket.pdf':'+91 00000 10001','multi-ticket.pdf':'+91 00000 10002','agency-table-ticket.pdf':'0000010004','agency-card-ticket.pdf':'0000010005'}.get(filename,'')
  lines.insert(1,'Agency Phone: +91 00000 99999')

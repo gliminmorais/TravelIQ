@@ -1,6 +1,6 @@
 import type { Passenger, Segment } from '../model';
 import { day } from '../validation';
-import { agencyTableParser, flightCardParser } from './templates';
+import { agencyTableParser, flightCardParser, indigoItineraryParser } from './templates';
 export type Extraction = {
   pnr: string;
   customerPhone: string;
@@ -92,7 +92,12 @@ const generic: TicketParser = {
   },
 };
 // Layout adapters run before the conservative generic parser. They never receive financial field setters.
-const parsers: TicketParser[] = [flightCardParser, agencyTableParser, generic];
+const parsers: TicketParser[] = [
+  indigoItineraryParser,
+  flightCardParser,
+  agencyTableParser,
+  generic,
+];
 export function parseTicket(text: string): Extraction {
   if (text.length > 200000) throw Error('Too much text in this document');
   if (text.trim().length < 20)

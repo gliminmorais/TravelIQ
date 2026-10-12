@@ -1,8 +1,8 @@
 {
-  "dataset": "Five generated fictional fixtures; not representative airline accuracy",
-  "documents": 5,
-  "fields": 64,
-  "correct": 64,
+  "dataset": "Six generated fictional fixtures; not representative airline accuracy",
+  "documents": 6,
+  "fields": 78,
+  "correct": 78,
   "accuracy": 1,
   "results": [
     {
@@ -259,6 +259,68 @@
         },
         {
           "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "file": "indigo-itinerary-ticket.pdf",
+      "parser": "indigo-itinerary-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "passengers.1.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.1.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "passengers.2.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.2.ticketNumber",
           "correct": true
         },
         {

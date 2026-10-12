@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Plane,
@@ -24,7 +23,6 @@ import {
   Sun,
   Moon,
   Menu,
-  LogOut,
   ShieldCheck,
   Sparkles,
   RotateCcw,
@@ -32,15 +30,14 @@ import {
   Clock,
   Check,
   FileText,
-  Archive,
+  Trash2,
   Mail,
   Phone,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
-import type { Booking, Viewer, DocumentRecord, Transaction } from '@/lib/model';
+import type { Booking, Transaction } from '@/lib/model';
 import type { BookingInput } from '@/lib/validation';
 import { transactionSchema } from '@/lib/validation';
-import type { Mode } from '@/lib/config';
 import { demoBookings, DEMO_TODAY } from '@/lib/demo';
 import { financials, inr, csv, D, validateTransaction } from '@/lib/finance';
 import { totals, monthly, ranked, customers } from '@/lib/analytics';
@@ -78,27 +75,11 @@ const titles: Record<string, [string, string]> = {
   simulator: ['What if you could see ahead?', 'Turn a business idea into a measurable scenario.'],
   documents: [
     'All the details, together.',
-    'Review tickets and keep supporting documents with their bookings.',
+    'Review ticket PDFs and turn their details into bookings.',
   ],
-  settings: ['Make this workspace yours.', 'Appearance, data controls and agency access.'],
+  settings: ['Make this workspace yours.', 'Appearance and controls for your browser workspace.'],
 };
 const storeKey = 'traveliq-demo-v1';
-async function api(path: string, method = 'GET', body?: unknown) {
-  const r = await fetch(path, {
-    method,
-    headers:
-      body instanceof FormData
-        ? undefined
-        : body
-          ? { 'Content-Type': 'application/json' }
-          : undefined,
-    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-    cache: 'no-store',
-  });
-  const data = await r.json();
-  if (!r.ok) throw Error(data.error || 'Request failed');
-  return data;
-}
 function download(name: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })),
     a = document.createElement('a');
@@ -114,12 +95,9 @@ function dateLabel(v: string) {
     year: 'numeric',
   });
 }
-export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
-  const router = useRouter();
-  const demo = mode === 'demo',
-    today = demo
-      ? DEMO_TODAY
-      : new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+export function Workspace() {
+  const viewer = { name: 'Demo explorer', role: 'admin' as const };
+  const today = DEMO_TODAY;
   const [view, setView] = useState('dashboard'),
     [bookings, setBookings] = useState<Booking[]>([]),
     [loading, setLoading] = useState(true),
@@ -134,17 +112,16 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
     [destination, setDestination] = useState('all'),
     [basis, setBasis] = useState<'booking' | 'departure'>('booking'),
     [filterOpen, setFilterOpen] = useState(false),
-    [form, setForm] = useState<{ existing?: Booking; upload: boolean } | null>(null),
+    [form, setForm] = useState<{
+      existing?: Booking;
+      upload: boolean;
+    } | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [payment, setPayment] = useState<Booking | null>(null),
     [customer, setCustomer] = useState<string | null>(null),
-    [confirm, setConfirm] = useState<'reset' | 'archive' | null>(null),
-    [documents, setDocuments] = useState<DocumentRecord[]>([]),
+    [confirm, setConfirm] = useState<'reset' | 'delete' | null>(null),
     [sort, setSort] = useState('date'),
     [page, setPage] = useState(1),
-    [audit, setAudit] = useState<
-      { id: string; action: string; recordId: string; createdAt: string }[]
-    >([]),
     [saving, setSaving] = useState(false);
   const navigate = (id: string) => {
     setView(id);
@@ -157,7 +134,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
     setLoading(true);
     setLoadError('');
     try {
-      if (demo) {
+      {
         const saved = localStorage.getItem(storeKey);
         let value: Booking[];
         try {
@@ -168,23 +145,13 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
           toast.info('The demo was reset because its saved data could not be read.');
         }
         setBookings(value);
-      } else {
-        let cursor: string | null = null;
-        const all: Booking[] = [];
-        do {
-          const data = await api('/api/bookings' + (cursor ? '?cursor=' + cursor : ''));
-          all.push(...data.bookings);
-          cursor = data.nextCursor;
-        } while (cursor);
-        setBookings(all);
-        setDocuments(await api('/api/documents'));
       }
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : 'Could not load records');
     } finally {
       setLoading(false);
     }
-  }, [demo]);
+  }, []);
   useEffect(() => {
     const v = new URLSearchParams(location.search).get('view');
     if (v && navigation.some((n) => n.id === v)) setView(v);
@@ -195,14 +162,30 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     localStorage.setItem('traveliq-theme', dark ? 'dark' : 'light');
   }, [dark]);
+  useEffect(() => {
+    // Keep other open tabs in this browser from displaying or restoring reset data.
+    const sync = (event: StorageEvent) => {
+      if (event.key === storeKey) {
+        setSelected(null);
+        setForm(null);
+        setPayment(null);
+        setCustomer(null);
+        setConfirm(null);
+        void load();
+      }
+    };
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [load]);
   function persist(next: Booking[]) {
-    if (demo) localStorage.setItem(storeKey, JSON.stringify(next));
+    localStorage.setItem(storeKey, JSON.stringify(next));
     setBookings(next);
   }
   const current = selected ? bookings.find((b) => b.id === selected) : undefined;
+  const reportBookings = useMemo(() => bookings.filter((b) => !b.archived), [bookings]);
   const filtered = useMemo(
     () =>
-      bookings.filter((b) => {
+      reportBookings.filter((b) => {
         const day = basis === 'booking' ? b.bookedOn : b.segments[0]?.departure.slice(0, 10) || '';
         return (
           (!start || day >= start) &&
@@ -222,7 +205,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
               .includes(query.toLowerCase()))
         );
       }),
-    [bookings, basis, start, end, status, airline, destination, query],
+    [reportBookings, basis, start, end, status, airline, destination, query],
   );
   const active = filtered.filter((b) => !b.archived),
     summary = totals(filtered),
@@ -230,7 +213,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
     destinations = ranked(filtered, (b) => b.segments[0]?.destination || '—').sort(
       (a, b) => b.bookings - a.bookings,
     ),
-    allCustomers = customers(bookings, today),
+    allCustomers = customers(reportBookings, today),
     visibleCustomers = customers(filtered, today),
     upcoming = bookings
       .filter(
@@ -251,7 +234,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
   );
   async function save(data: BookingInput, id?: string, file?: File) {
     let saved: Booking;
-    if (demo) {
+    {
       const old = id ? bookings.find((b) => b.id === id) : undefined,
         match = bookings.find(
           (b) =>
@@ -269,23 +252,11 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
         version: (old?.version || 0) + 1,
         createdAt: old?.createdAt || new Date().toISOString(),
       };
-    } else
-      saved = await api(id ? '/api/bookings/' + id : '/api/bookings', id ? 'PUT' : 'POST', data);
+    }
     persist(id ? bookings.map((b) => (b.id === id ? saved : b)) : [...bookings, saved]);
     toast.success(id ? 'Booking updated' : 'Booking created');
     if (file) {
-      if (demo) toast.info('Demo PDFs are temporary and are not uploaded.');
-      else {
-        try {
-          const body = new FormData();
-          body.set('bookingId', saved.id);
-          body.set('file', file);
-          await api('/api/documents', 'POST', body);
-          setDocuments(await api('/api/documents'));
-        } catch {
-          toast.error('Booking saved, but the PDF was not retained. Retry from Documents.');
-        }
-      }
+      toast.info('Demo PDFs are temporary and are not uploaded.');
     }
   }
   function exportRows() {
@@ -329,7 +300,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
       version: payment.version + 1,
     };
     validateTransaction(payment, next.transactions.at(-1)!);
-    const updated = demo ? next : await api(`/api/bookings/${payment.id}/transactions`, 'POST', t);
+    const updated = next;
     persist(bookings.map((b) => (b.id === payment.id ? updated : b)));
     setPayment(null);
     toast.success('Financial transaction recorded');
@@ -338,17 +309,25 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
     setSaving(true);
     try {
       if (confirm === 'reset') {
-        localStorage.removeItem(storeKey);
-        setBookings(demoBookings());
-        setDocuments([]);
-        toast.success('Your fictional demo data has been reset');
-      } else if (current) {
-        if (!financials(current).balance.isZero())
-          throw Error('Settle the balance or customer credit before archiving.');
-        if (!demo) await api('/api/bookings/' + current.id, 'DELETE');
-        persist(bookings.map((b) => (b.id === current.id ? { ...b, archived: true } : b)));
+        // An explicit empty array survives reload; a missing key loads the starter demo.
+        persist([]);
         setSelected(null);
-        toast.success('Booking archived. Financial history is retained.');
+        setPayment(null);
+        setCustomer(null);
+        setForm(null);
+        setQuery('');
+        setStart('');
+        setEnd('');
+        setStatus('all');
+        setAirline('all');
+        setDestination('all');
+        setPage(1);
+        toast.success('Your demo is now empty. Add your first booking to get started.');
+      } else if (current) {
+        persist(bookings.filter((b) => b.id !== current.id));
+        setSelected(null);
+        setPage(1);
+        toast.success('Booking deleted. Reports have been updated.');
       }
       setConfirm(null);
     } catch (e) {
@@ -483,8 +462,8 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
         <div className="workspace-switch">
           <div className="workspace-avatar">T</div>
           <div>
-            <strong>{demo ? 'Explorer workspace' : 'Agency workspace'}</strong>
-            <small>{demo ? 'Portfolio demonstration' : 'Private business workspace'}</small>
+            <strong>{'Explorer workspace'}</strong>
+            <small>{'Portfolio demonstration'}</small>
           </div>
           <ChevronDown size={14} />
         </div>
@@ -519,7 +498,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
             <span className="user-avatar">{viewer.name[0]}</span>
             <div>
               <strong>{viewer.name}</strong>
-              <small>{demo ? 'Demo administrator' : viewer.role}</small>
+              <small>{'Demo administrator'}</small>
             </div>
             <ShieldCheck size={16} />
           </div>
@@ -540,9 +519,9 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
             <strong>{navigation.find((n) => n.id === view)?.label}</strong>
           </div>
           <div className="top-actions">
-            <span className={'mode-pill ' + (!demo ? 'private' : '')}>
+            <span className={'mode-pill ' + ''}>
               <span />
-              {demo ? 'Demo mode' : 'Private agency'}
+              {'Demo mode'}
             </span>
             <button
               className="icon-button"
@@ -551,22 +530,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
             >
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {!demo && (
-              <button
-                className="icon-button"
-                aria-label="Sign out"
-                onClick={() => {
-                  void api('/api/auth', 'POST', { action: 'logout' })
-                    .then(() => {
-                      router.push('/');
-                      router.refresh();
-                    })
-                    .catch((e) => toast.error(e.message));
-                }}
-              >
-                <LogOut size={18} />
-              </button>
-            )}
+
             <span className="top-avatar">{viewer.name[0]}</span>
           </div>
         </header>
@@ -592,10 +556,11 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
               </button>
             </div>
           </div>
-          {demo && (
+          {
             <div className="demo-banner">
               <span>
-                <span className="demo-dot" />A real workspace. Entirely fictional data.
+                <span className="demo-dot" />
+                Your demo workspace. Saved only in this browser.
               </span>
               <span>
                 Explore freely. Changes stay in this browser.
@@ -604,7 +569,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                 </button>
               </span>
             </div>
-          )}
+          }
           {['dashboard', 'bookings', 'customers', 'financials', 'analytics'].includes(view) && (
             <>
               <div className="filter-bar">
@@ -885,9 +850,9 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                     </Card>
                   </div>
                   <p className="footnote">
-                    Reports include archived bookings to preserve financial history. Cancellation
-                    status alone does not change revenue: record a charge/cost adjustment and any
-                    cash refund separately.
+                    Reports exclude deleted and previously archived bookings. Cancellation status
+                    alone does not change revenue: record a charge/cost adjustment and any cash
+                    refund separately.
                   </p>
                 </>
               )}
@@ -1124,7 +1089,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                   onSelect={(b) => setSelected(b.id)}
                 />
               )}
-              {view === 'forecasting' && <Forecasting bookings={bookings} today={today} />}
+              {view === 'forecasting' && <Forecasting bookings={reportBookings} today={today} />}
               {view === 'simulator' && <Simulator />}
               {view === 'documents' && (
                 <>
@@ -1157,6 +1122,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                           ['alternate-ticket.pdf', 'Alternate labels · missing arrival'],
                           ['agency-table-ticket.pdf', 'Agency table · connecting flights'],
                           ['agency-card-ticket.pdf', 'Agency flight card · one passenger'],
+                          ['indigo-itinerary-ticket.pdf', 'IndiGo itinerary · three passengers'],
                         ].map(([file, label]) => (
                           <a key={file} href={'/samples/' + file} download>
                             <span className="sample-icon">
@@ -1176,96 +1142,11 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                       </p>
                     </Card>
                   </div>
-                  <Card
-                    title="Retained documents"
-                    subtitle={
-                      demo
-                        ? 'Demo files are temporary. Nothing is uploaded or shared.'
-                        : 'Private documents · download links expire after 60 seconds'
-                    }
-                  >
-                    {documents.length ? (
-                      <div className="table-scroll">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Document</th>
-                              <th>Booking</th>
-                              <th>Uploaded</th>
-                              <th />
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {documents.map((d) => (
-                              <tr key={d.id}>
-                                <td>{d.name}</td>
-                                <td>
-                                  {bookings.find((b) => b.id === d.bookingId)?.pnr ||
-                                    d.bookingId.slice(0, 8)}
-                                </td>
-                                <td>{dateLabel(d.createdAt)}</td>
-                                <td>
-                                  <button
-                                    onClick={() => {
-                                      void api('/api/documents/' + d.id)
-                                        .then((r) => location.assign(r.url))
-                                        .catch((e) => toast.error(e.message));
-                                    }}
-                                  >
-                                    Download
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <Empty
-                        text={
-                          demo
-                            ? 'Try an import above. Demo documents disappear when the review closes.'
-                            : 'No retained documents yet. You can attach a PDF to a saved booking below.'
-                        }
-                      />
-                    )}
-                    {!demo && (
-                      <form
-                        className="attach-form"
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          const target = e.currentTarget;
-                          setSaving(true);
-                          try {
-                            const body = new FormData(target);
-                            await api('/api/documents', 'POST', body);
-                            setDocuments(await api('/api/documents'));
-                            target.reset();
-                            toast.success('Private document retained');
-                          } catch (e) {
-                            toast.error(e instanceof Error ? e.message : 'Upload failed');
-                          } finally {
-                            setSaving(false);
-                          }
-                        }}
-                      >
-                        <Field label="Booking">
-                          <select name="bookingId" required>
-                            {bookings
-                              .filter((b) => !b.archived)
-                              .map((b) => (
-                                <option key={b.id} value={b.id}>
-                                  {b.pnr} · {b.customerName}
-                                </option>
-                              ))}
-                          </select>
-                        </Field>
-                        <Field label="PDF up to 4 MB">
-                          <input type="file" name="file" accept="application/pdf" required />
-                        </Field>
-                        <button disabled={saving || !bookings.length}>Attach PDF</button>
-                      </form>
-                    )}
+                  <Card title="Your ticket stays on your device" subtitle="PDF review is temporary">
+                    <p className="footnote">
+                      Import a ticket to fill booking details. The PDF is processed in your browser
+                      and is not stored or uploaded.
+                    </p>
                   </Card>
                 </>
               )}
@@ -1301,82 +1182,42 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                       </div>
                     </Card>
                     <Card
-                      title={demo ? 'Your demo sandbox' : 'Agency security'}
-                      subtitle={
-                        demo
-                          ? 'A separate, resettable browser workspace'
-                          : 'Invitation-only access managed by your administrator'
-                      }
+                      title={'Your demo sandbox'}
+                      subtitle={'A separate, resettable browser workspace'}
                     >
                       <div className="setting-row">
                         <div>
-                          <strong>{demo ? 'Reset all demo changes' : 'Your role'}</strong>
+                          <strong>{'Start with an empty demo'}</strong>
                           <small>
-                            {demo ? 'Restore the reproducible fictional dataset.' : viewer.name}
+                            {'Remove sample data and your entries in this browser only.'}
                           </small>
                         </div>
-                        {demo ? (
+                        {
                           <button onClick={() => setConfirm('reset')}>
                             <RotateCcw size={15} />
                             Reset demo
                           </button>
-                        ) : (
-                          <Badge tone="mint">{viewer.role}</Badge>
-                        )}
+                        }
                       </div>
                       <div className="notice">
                         <ShieldCheck size={20} />
                         <span>
-                          {demo
-                            ? 'This deployment has no agency database, authentication or storage credentials. Its reference date is 12 October 2026.'
-                            : 'Membership is checked on every protected request. Ask your administrator to provision staff or revoke access using the onboarding tools.'}
+                          {
+                            'This deployment has no agency database, authentication or storage credentials. Its reference date is 12 October 2026.'
+                          }
                         </span>
                       </div>
-                      {!demo && (
-                        <a className="text-button" href="/reset-password">
-                          Change your password <ArrowRight size={15} />
-                        </a>
-                      )}
                     </Card>
                   </div>
-                  {!demo && viewer.role === 'admin' && (
+                  {bookings.some((b) => b.archived) && (
                     <Card
-                      title="Recent audit activity"
-                      subtitle="Last 100 changes · record identifiers only"
-                      action={
-                        <button
-                          onClick={() => {
-                            void api('/api/audit')
-                              .then(setAudit)
-                              .catch((e) => toast.error(e.message));
-                          }}
-                        >
-                          Load audit records
-                        </button>
-                      }
+                      title="Previously archived bookings"
+                      subtitle="Excluded from all reports. Open a booking to delete it permanently."
                     >
-                      <div className="table-scroll">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Action</th>
-                              <th>Record</th>
-                              <th>Date</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {audit.map((a) => (
-                              <tr key={a.id}>
-                                <td>{a.action}</td>
-                                <td>{a.recordId}</td>
-                                <td>{new Date(a.createdAt).toLocaleString('en-IN')}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                      {bookingTable(bookings.filter((b) => b.archived))}
                     </Card>
                   )}
+
                   <Card
                     title="Accounting & reporting"
                     subtitle="Transparent definitions are part of good decisions"
@@ -1397,9 +1238,9 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
                         reports, not period-close statutory accounts.
                       </p>
                       <p>
-                        <strong>Retention</strong> Archived bookings remain in financial reports.
-                        Audit logs and financial entries are retained. An administrator handles
-                        legal retention and deletion requests using the documented procedure.
+                        <strong>Deletion</strong> Deleting a booking removes its passengers, flights
+                        and financial entries from the workspace and reports. Deleted entries are
+                        removed from this browser’s saved data.
                       </p>
                     </div>
                   </Card>
@@ -1413,7 +1254,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
               TravelIQ <span>·</span> A little clarity. A world of possibilities.
             </span>
             <span>
-              {demo ? 'Fictional data · Portfolio edition' : 'Secure agency workspace'}
+              {'Fictional data · Portfolio edition'}
               <span className="green-dot" />
             </span>
           </footer>
@@ -1525,12 +1366,12 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
               )}
             </div>
             <div className="form-footer">
-              {viewer.role === 'admin' && !current.archived && (
-                <button className="danger" onClick={() => setConfirm('archive')}>
-                  <Archive size={15} />
-                  Archive
+              {
+                <button className="danger" onClick={() => setConfirm('delete')}>
+                  <Trash2 size={15} />
+                  Delete
                 </button>
-              )}
+              }
               <div className="spacer" />
               <button
                 disabled={current.archived}
@@ -1583,11 +1424,11 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
       )}
       {confirm && (
         <Modal
-          title={confirm === 'reset' ? 'Reset your demo workspace?' : 'Archive this booking?'}
+          title={confirm === 'reset' ? 'Reset your demo workspace?' : 'Delete this booking?'}
           description={
             confirm === 'reset'
-              ? 'Your local additions and edits will be replaced with the original fictional dataset.'
-              : 'The booking will leave the active list. Financial entries and audit history will be retained.'
+              ? 'All sample bookings and your own entries will be removed from this browser. You will start with an empty workspace. Other visitors are unaffected. This cannot be undone.'
+              : 'This permanently removes the booking, its passengers, flights and financial entries. It will no longer appear in any graph or report. This cannot be undone.'
           }
           onClose={() => setConfirm(null)}
         >
@@ -1595,7 +1436,7 @@ export function Workspace({ mode, viewer }: { mode: Mode; viewer: Viewer }) {
             <button onClick={() => setConfirm(null)}>Cancel</button>
             <button className="primary" disabled={saving} onClick={() => void confirmAction()}>
               <Check size={16} />
-              {saving ? 'Working…' : confirm === 'reset' ? 'Reset demo' : 'Archive booking'}
+              {saving ? 'Working…' : confirm === 'reset' ? 'Reset demo' : 'Delete booking'}
             </button>
           </div>
         </Modal>

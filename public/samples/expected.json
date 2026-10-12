@@ -133,5 +133,36 @@
       ],
       "customerPhone": "0000010005"
     }
+  },
+  {
+    "file": "indigo-itinerary-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO06",
+      "passengers": [
+        {
+          "name": "MAYA EXAMPLE",
+          "ticketNumber": ""
+        },
+        {
+          "name": "ARJUN EXAMPLE",
+          "ticketNumber": ""
+        },
+        {
+          "name": "TARA EXAMPLE",
+          "ticketNumber": ""
+        }
+      ],
+      "segments": [
+        {
+          "airline": "IndiGo",
+          "flightNumber": "6E 1234",
+          "origin": "BOM",
+          "destination": "DXB",
+          "departure": "2026-11-15T01:20",
+          "arrival": "2026-11-15T03:55"
+        }
+      ],
+      "customerPhone": ""
+    }
   }
 ]
