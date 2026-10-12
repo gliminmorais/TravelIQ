@@ -1,5 +1,6 @@
 import type { Booking } from './model';
 import { financials, sum, D } from './finance';
+import { journeyLabel } from './journey';
 export function totals(bookings: Booking[]) {
   const f = bookings.map(financials),
     revenue = sum(f.map((x) => x.revenue)),
@@ -136,8 +137,7 @@ export function anomalies(bookings: Booking[]) {
         x.id !== b.id &&
         x.bookedOn < b.bookedOn &&
         x.segments[0]?.airline === b.segments[0]?.airline &&
-        x.segments[0]?.origin === b.segments[0]?.origin &&
-        x.segments[0]?.destination === b.segments[0]?.destination,
+        journeyLabel(x) === journeyLabel(b),
     );
     if (peers.length >= 10) {
       const previous = median(peers.map((x) => financials(x).cost.toNumber()));

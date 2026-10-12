@@ -5,6 +5,7 @@ import type { Booking } from '@/lib/model';
 import { monthly, customers, ranked, anomalies, simulate, totals } from '@/lib/analytics';
 import { forecast } from '@/lib/forecast';
 import { inr, D } from '@/lib/finance';
+import { journeyLabel } from '@/lib/journey';
 import { Card, Kpi, Badge, Empty, Field } from './ui';
 import { Bars } from './charts';
 export function Intelligence({
@@ -18,10 +19,7 @@ export function Intelligence({
 }) {
   const cs = useMemo(() => customers(bookings, today), [bookings, today]),
     flags = useMemo(() => anomalies(bookings), [bookings]),
-    routes = ranked(
-      bookings,
-      (b) => `${b.segments[0]?.origin} → ${b.segments[0]?.destination}`,
-    ).sort((a, b) => b.profit.comparedTo(a.profit)),
+    routes = ranked(bookings, journeyLabel).sort((a, b) => b.profit.comparedTo(a.profit)),
     airlines = ranked(bookings, (b) => b.segments[0]?.airline || 'Unknown').sort((a, b) =>
       b.profit.comparedTo(a.profit),
     ),

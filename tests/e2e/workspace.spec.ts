@@ -68,8 +68,15 @@ test('PDF review requires manual financial entry and explicit verification', asy
   await page.getByRole('button', { name: 'Bookings', exact: true }).click();
   await page.getByLabel('Search bookings').fill('Portfolio Test');
   await expect(page.getByRole('button', { name: 'Portfolio Test', exact: true })).toBeVisible();
+  const connectingRow = page
+    .locator('tr')
+    .filter({ has: page.getByRole('button', { name: 'Portfolio Test', exact: true }) });
+  await expect(connectingRow).toContainText(/BLR\s*→\s*HYD/);
+  await expect(connectingRow).toContainText('via MAA');
   await page.getByRole('button', { name: 'Portfolio Test', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('₹50.20');
+  await expect(page.locator('.flight-detail').nth(0).locator('strong')).toHaveText('BLRMAA');
+  await expect(page.locator('.flight-detail').nth(1).locator('strong')).toHaveText('MAAHYD');
   await page.getByRole('button', { name: 'Record financial entry', exact: true }).click();
   await page.getByLabel('Amount (₹)', { exact: true }).fill('50');
   await page.getByLabel('Reason / payment reference').fill('Fictional test payment');

@@ -1,0 +1,168 @@
+[
+  {
+    "file": "single-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO01",
+      "passengers": [
+        {
+          "name": "Maya Example",
+          "ticketNumber": "000-1234567890"
+        }
+      ],
+      "segments": [
+        {
+          "airline": "Northstar Air",
+          "flightNumber": "NS 101",
+          "origin": "BOM",
+          "destination": "DXB",
+          "departure": "2026-11-15T09:30",
+          "arrival": "2026-11-15T11:20"
+        }
+      ],
+      "customerPhone": "+91 00000 10001"
+    }
+  },
+  {
+    "file": "multi-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO02",
+      "passengers": [
+        {
+          "name": "Arjun Fiction",
+          "ticketNumber": "000-2234567890"
+        },
+        {
+          "name": "Tara Fiction",
+          "ticketNumber": "000-2234567891"
+        }
+      ],
+      "segments": [
+        {
+          "airline": "Blue Horizon",
+          "flightNumber": "BH 205",
+          "origin": "DEL",
+          "destination": "SIN",
+          "departure": "2026-11-20T08:45",
+          "arrival": "2026-11-20T17:00"
+        },
+        {
+          "airline": "Blue Horizon",
+          "flightNumber": "BH 206",
+          "origin": "SIN",
+          "destination": "DEL",
+          "departure": "2026-11-27T18:00",
+          "arrival": "2026-11-27T21:20"
+        }
+      ],
+      "customerPhone": "+91 00000 10002"
+    }
+  },
+  {
+    "file": "alternate-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO03",
+      "passengers": [
+        {
+          "name": "Leela Sample",
+          "ticketNumber": ""
+        }
+      ],
+      "segments": [
+        {
+          "airline": "Skyline Air",
+          "flightNumber": "SL 401",
+          "origin": "BLR",
+          "destination": "GOI",
+          "departure": "2026-12-02T14:10",
+          "arrival": ""
+        }
+      ],
+      "customerPhone": ""
+    }
+  },
+  {
+    "file": "agency-table-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO04",
+      "passengers": [
+        {
+          "name": "DEV FICTION",
+          "ticketNumber": "00000001"
+        }
+      ],
+      "segments": [
+        {
+          "airline": "IndiGo",
+          "flightNumber": "6E 1001",
+          "origin": "BLR",
+          "destination": "MAA",
+          "departure": "2027-01-12T13:15",
+          "arrival": "2027-01-12T14:35"
+        },
+        {
+          "airline": "IndiGo",
+          "flightNumber": "6E 1002",
+          "origin": "MAA",
+          "destination": "HYD",
+          "departure": "2027-01-12T17:15",
+          "arrival": "2027-01-12T18:10"
+        }
+      ],
+      "customerPhone": "0000010004"
+    }
+  },
+  {
+    "file": "agency-card-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO05",
+      "passengers": [
+        {
+          "name": "Rohan Example",
+          "ticketNumber": "00000005"
+        }
+      ],
+      "segments": [
+        {
+          "airline": "Air India Express",
+          "flightNumber": "IX 100",
+          "origin": "COK",
+          "destination": "DXB",
+          "departure": "2027-01-21T08:20",
+          "arrival": "2027-01-21T11:05"
+        }
+      ],
+      "customerPhone": "0000010005"
+    }
+  },
+  {
+    "file": "indigo-itinerary-ticket.pdf",
+    "expected": {
+      "pnr": "DEMO06",
+      "passengers": [
+        {
+          "name": "MAYA EXAMPLE",
+          "ticketNumber": ""
+        },
+        {
+          "name": "ARJUN EXAMPLE",
+          "ticketNumber": ""
+        },
+        {
+          "name": "TARA EXAMPLE",
+          "ticketNumber": ""
+        }
+      ],
+      "segments": [
+        {
+          "airline": "IndiGo",
+          "flightNumber": "6E 1234",
+          "origin": "BOM",
+          "destination": "DXB",
+          "departure": "2026-11-15T01:20",
+          "arrival": "2026-11-15T03:55"
+        }
+      ],
+      "customerPhone": ""
+    }
+  }
+]

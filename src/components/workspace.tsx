@@ -41,6 +41,7 @@ import { transactionSchema } from '@/lib/validation';
 import { demoBookings, DEMO_TODAY } from '@/lib/demo';
 import { financials, inr, csv, D, validateTransaction } from '@/lib/finance';
 import { totals, monthly, ranked, customers } from '@/lib/analytics';
+import { journeyRoute } from '@/lib/journey';
 import { BookingForm } from './booking-form';
 import { Card, Kpi, Badge, Modal, Field, Empty } from './ui';
 import { TrendChart } from './charts';
@@ -192,7 +193,7 @@ export function Workspace() {
           (!end || day <= end) &&
           (status === 'all' || b.status === status) &&
           (airline === 'all' || b.segments.some((s) => s.airline === airline)) &&
-          (destination === 'all' || b.segments.some((s) => s.destination === destination)) &&
+          (destination === 'all' || journeyRoute(b).destination === destination) &&
           (!query ||
             [
               b.customerName,
@@ -210,7 +211,7 @@ export function Workspace() {
   const active = filtered.filter((b) => !b.archived),
     summary = totals(filtered),
     trend = monthly(filtered, basis).slice(-12),
-    destinations = ranked(filtered, (b) => b.segments[0]?.destination || '—').sort(
+    destinations = ranked(filtered, (b) => journeyRoute(b).destination || '—').sort(
       (a, b) => b.bookings - a.bookings,
     ),
     allCustomers = customers(reportBookings, today),
@@ -272,7 +273,9 @@ export function Workspace() {
             booked_on: b.bookedOn,
             departure: b.segments[0]?.departure,
             airline: b.segments[0]?.airline,
-            destination: b.segments[0]?.destination,
+            origin: journeyRoute(b).origin,
+            destination: journeyRoute(b).destination,
+            via: journeyRoute(b).via.join(' / '),
             status: b.status,
             currency: b.currency,
             original_charge: b.customerCharged,
@@ -365,7 +368,8 @@ export function Workspace() {
         <tbody>
           {rows.map((b) => {
             const f = financials(b),
-              s = b.segments[0];
+              s = b.segments[0],
+              route = journeyRoute(b);
             return (
               <tr key={b.id}>
                 <td>
@@ -390,12 +394,14 @@ export function Workspace() {
                 </td>
                 <td>
                   <strong>
-                    {s?.origin} <span className="route-arrow">→</span> {s?.destination}
+                    {route.origin} <span className="route-arrow">→</span> {route.destination}
                   </strong>
                   <small>
                     {s?.airline}
                     {b.segments.length > 1 ? ` · +${b.segments.length - 1} leg` : ''}
                   </small>
+                  {route.via.length > 0 && <small>via {route.via.join(' · ')}</small>}
+                  {route.hasMoreJourneys && <small>Return / additional journey included</small>}
                 </td>
                 <td>
                   {s ? dateLabel(s.departure) : '—'}
@@ -658,7 +664,8 @@ export function Workspace() {
                       }}
                     >
                       <option value="all">All destinations</option>
-                      {[...new Set(bookings.flatMap((b) => b.segments.map((s) => s.destination)))]
+                      {[...new Set(reportBookings.map((b) => journeyRoute(b).destination))]
+                        .filter(Boolean)
                         .sort()
                         .map((s) => (
                           <option key={s}>{s}</option>
@@ -829,9 +836,9 @@ export function Workspace() {
                             </span>
                             <span>
                               <strong>
-                                {b.segments[0].origin}
+                                {journeyRoute(b).origin}
                                 <span> → </span>
-                                {b.segments[0].destination}
+                                {journeyRoute(b).destination}
                               </strong>
                               <small>{b.customerName}</small>
                               <small>

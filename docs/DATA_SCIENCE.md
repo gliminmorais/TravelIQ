@@ -16,7 +16,7 @@ These are retrospective **current-adjusted** booking totals. Later charge correc
 
 Recency is days since the last booking, frequency is booking count, and monetary value is current adjusted customer charges. Rules prioritize inactive (>180 days), then high value (5+ bookings and >=₹100,000), regular (3+), and new/occasional. UI filters define the reporting cohort; full customer history remains accessible in each profile. Labels are explainable rule groups, not learned clusters. Negative profit and cancellations remain part of the history rather than disappearing silently.
 
-Route and airline profitability attribute a booking's total to its first segment, avoiding double-counting multi-leg booking amounts. This is an explicit attribution convention, not actual per-leg fare allocation. Revenue concentration measures the five largest customer shares; repeat behavior measures customers with at least two bookings. Margin bands describe distributions, not causal drivers.
+Route profitability attributes a booking's total once to its full outward journey: first origin to final connected destination. Intermediate airports are layovers. Return flights and disconnected journeys remain in the details; the summary keeps the first outward destination. Airline profitability uses the first segment's airline. These are explicit attribution conventions, not actual per-leg fare allocations. Revenue concentration measures the five largest customer shares; repeat behavior measures customers with at least two bookings. Margin bands describe distributions, not causal drivers.
 
 ## Anomaly rules
 

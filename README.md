@@ -4,7 +4,19 @@ A public travel-agency dashboard with browser-local bookings, ticket PDF import,
 
 This package contains **only the public version**. There is no sign-in, account management, cloud database, private API, Supabase integration or private deployment configuration. Every visitor works with their own browser's saved data.
 
+## Architecture
+
+![TravelIQ public architecture: hosted interface, local PDF processing, browser storage and analytics](docs/images/architecture.png)
+
+GitHub holds the source and Vercel serves the Next.js interface. Ticket extraction, human review, booking storage and analytics run in the visitor's browser. Saved booking data feeds the dashboard; deleting a booking removes its contribution to every report, and Reset Demo persists an empty workspace. PDFs stay temporary on the device.
+
+The [SVG version](docs/images/architecture.svg) stays sharp at any size.
+
 ## Changes in this release
+
+### Connecting flights show the final destination
+
+A ticket with `TRV → BLR` and `BLR → MAA` now appears as **TRV → MAA, via BLR** in the booking summary. Every leg remains available in the booking details. Upcoming journeys, destination filters, destination charts, route analysis and CSV exports use the complete outward route. Existing saved bookings update automatically; no re-import is needed. Return itineraries keep their outward destination in the summary and retain return legs in the details.
 
 ### 1. Ticket PDF import fixed
 
@@ -94,6 +106,6 @@ npm run test:e2e
 
 Browser tests use Chrome. They cover the import/save/payment/delete flow, empty reset after reload, same-browser tab updates, separate-visitor isolation, old archived records, responsive navigation, themes and the absence of private endpoints. PDF regression evaluation checks **78/78 expected fields across six fictional documents**. The supplied real ticket is not included in automated tests or the package.
 
-Verified on 12 October 2026: **26 unit tests, 6 browser tests and 5 Python evaluation tests passed**. Lint, type checking and the production build also passed. The reported real ticket was separately verified in the public browser importer with external network requests blocked.
+Verified on 13 October 2026: **30 unit tests and 6 browser workflows passed**. Lint, type checking and the production build also passed. The supplied layover ticket was separately verified in the public browser importer: its summary and CSV use the final destination while both original flight legs remain available. The earlier PDF evaluation passed 78/78 fields and the Python evaluation passed 5 tests; this update does not change those extraction or forecast algorithms.
 
 See [PDF extraction](docs/PDF_EXTRACTION.md) and [analytics methodology](docs/DATA_SCIENCE.md) for implementation details and limits. The optional `data-science/` folder contains the separate Python evaluation and tests; it is not needed to run the website.
