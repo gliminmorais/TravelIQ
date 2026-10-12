@@ -1,0 +1,9 @@
+node_modules
+.next
+public/pdf.worker.min.mjs
+package-lock.json
+src/db/generated
+test-results
+playwright-report
+public/reports
+data-science/reports

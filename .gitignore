@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+!.env.demo.example
+!.env.agency.example
+.vercel/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+__pycache__/
+.venv/
+data-science/private/
+*.log

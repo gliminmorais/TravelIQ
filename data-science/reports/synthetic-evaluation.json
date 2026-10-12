@@ -1,0 +1,137 @@
+{
+  "input": "synthetic-monthly.csv",
+  "observations": 36,
+  "synthetic": true,
+  "methodology": "rolling-origin validation, then three untouched sequential holdout origins; fixed alpha 0.3",
+  "results": {
+    "bookings": {
+      "selected_method": "naive",
+      "validation_origins": 6,
+      "test_origins": 3,
+      "validation_scores": [
+        {
+          "method": "naive",
+          "mae": 2.3333333333333335,
+          "rmse": 2.886751345948129,
+          "wape": 10.687022900763358
+        },
+        {
+          "method": "seasonal_naive",
+          "mae": 2.3333333333333335,
+          "rmse": 3.1622776601683795,
+          "wape": 10.687022900763358
+        },
+        {
+          "method": "exponential_smoothing",
+          "mae": 2.495031524886724,
+          "rmse": 2.7237366921396844,
+          "wape": 11.42762530482469
+        },
+        {
+          "method": "moving_average_3",
+          "mae": 3.055555555555555,
+          "rmse": 3.4986769986297297,
+          "wape": 13.994910941475823
+        }
+      ],
+      "holdout": {
+        "mae": 3.0,
+        "rmse": 3.415650255319866,
+        "wape": 14.285714285714286
+      },
+      "future": [
+        24.0,
+        24.0,
+        24.0
+      ],
+      "interval": null,
+      "interval_reason": "Too few untouched residuals to validate interval coverage"
+    },
+    "revenue": {
+      "selected_method": "seasonal_naive",
+      "validation_origins": 6,
+      "test_origins": 3,
+      "validation_scores": [
+        {
+          "method": "seasonal_naive",
+          "mae": 80115.16666666667,
+          "rmse": 118249.78189620477,
+          "wape": 13.039786606827747
+        },
+        {
+          "method": "exponential_smoothing",
+          "mae": 91972.71623959298,
+          "rmse": 109828.58424776042,
+          "wape": 14.969757204706722
+        },
+        {
+          "method": "naive",
+          "mae": 103785.83333333333,
+          "rmse": 117458.97693024574,
+          "wape": 16.8924958380139
+        },
+        {
+          "method": "moving_average_3",
+          "mae": 129590.05555555555,
+          "rmse": 145803.06838201694,
+          "wape": 21.092469018284888
+        }
+      ],
+      "holdout": {
+        "mae": 178437.33333333334,
+        "rmse": 215375.27264598722,
+        "wape": 25.4228900614068
+      },
+      "future": [
+        685736.0,
+        824083.0,
+        405797.0
+      ],
+      "interval": null,
+      "interval_reason": "Too few untouched residuals to validate interval coverage"
+    },
+    "profit": {
+      "selected_method": "seasonal_naive",
+      "validation_origins": 6,
+      "test_origins": 3,
+      "validation_scores": [
+        {
+          "method": "seasonal_naive",
+          "mae": 10077.333333333334,
+          "rmse": 11568.94495333664,
+          "wape": 12.492923349022492
+        },
+        {
+          "method": "exponential_smoothing",
+          "mae": 14950.104483336216,
+          "rmse": 17180.22499411792,
+          "wape": 18.533723475476005
+        },
+        {
+          "method": "naive",
+          "mae": 16400.5,
+          "rmse": 18695.906740068353,
+          "wape": 20.331786456633044
+        },
+        {
+          "method": "moving_average_3",
+          "mae": 19002.88888888889,
+          "rmse": 20665.888842889548,
+          "wape": 23.557981704704957
+        }
+      ],
+      "holdout": {
+        "mae": 26039.0,
+        "rmse": 30258.53018571788,
+        "wape": 26.543774104215156
+      },
+      "future": [
+        97615.0,
+        98562.0,
+        56034.0
+      ],
+      "interval": null,
+      "interval_reason": "Too few untouched residuals to validate interval coverage"
+    }
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "dataset": "Five generated fictional fixtures; not representative airline accuracy",
+  "documents": 5,
+  "fields": 64,
+  "correct": 64,
+  "accuracy": 1,
+  "results": [
+    {
+      "file": "single-ticket.pdf",
+      "parser": "labelled-ticket-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "file": "multi-ticket.pdf",
+      "parser": "labelled-ticket-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "passengers.1.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.1.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "segments.1.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.1.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.1.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.1.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.1.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.1.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "file": "alternate-ticket.pdf",
+      "parser": "labelled-ticket-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "file": "agency-table-ticket.pdf",
+      "parser": "agency-flight-table-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "segments.1.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.1.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.1.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.1.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.1.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.1.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "file": "agency-card-ticket.pdf",
+      "parser": "agency-flight-cards-v1",
+      "fields": [
+        {
+          "field": "pnr",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.name",
+          "correct": true
+        },
+        {
+          "field": "passengers.0.ticketNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.airline",
+          "correct": true
+        },
+        {
+          "field": "segments.0.flightNumber",
+          "correct": true
+        },
+        {
+          "field": "segments.0.origin",
+          "correct": true
+        },
+        {
+          "field": "segments.0.destination",
+          "correct": true
+        },
+        {
+          "field": "segments.0.departure",
+          "correct": true
+        },
+        {
+          "field": "segments.0.arrival",
+          "correct": true
+        },
+        {
+          "field": "customerPhone",
+          "correct": true
+        }
+      ]
+    }
+  ]
+}
